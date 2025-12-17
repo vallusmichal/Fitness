@@ -60,5 +60,11 @@ export default (sequelize: Sequelize, modelName: string) => {
 		}
 	)
 
+	UserModelCtor.associate = (models) => {
+		UserModelCtor.hasMany(models.CompletedExercise, {
+			foreignKey: 'userId'
+		})
+	}
+
 	return UserModelCtor
 }

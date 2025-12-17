@@ -4,6 +4,7 @@ import { Sequelize } from 'sequelize'
 import defineExercise from './exercise'
 import defineProgram from './program'
 import defineUser from './user'
+import defineCompletedExercise from './completedExercise'
 
 const sequelize: Sequelize = new Sequelize('postgresql://postgres:postgres@localhost:5432/fitness_app', {
 	logging: false
@@ -14,11 +15,13 @@ sequelize.authenticate().catch((e: any) => console.error(`Unable to connect to t
 const Exercise = defineExercise(sequelize, 'exercise')
 const Program = defineProgram(sequelize, 'program')
 const User = defineUser(sequelize, 'user')
+const CompletedExercise = defineCompletedExercise(sequelize, 'completed_exercise')
 
 const models = {
 	Exercise,
 	Program,
-	User
+	User,
+	CompletedExercise
 }
 type Models = typeof models
 
