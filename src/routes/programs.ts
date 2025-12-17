@@ -31,14 +31,16 @@ export default () => {
 			const program = await Program.findByPk(programId)
 			if (!program) {
 				return res.status(404).json({
-					error: 'Program not found'
+					data: {},
+					message: 'Program not found'
 				})
 			}
 
 			const exercise = await Exercise.findByPk(exerciseId)
 			if (!exercise) {
 				return res.status(404).json({
-					error: 'Exercise not found'
+					data: {},
+					message: 'Exercise not found'
 				})
 			}
 
@@ -53,8 +55,8 @@ export default () => {
 			})
 		} catch (error: any) {
 			return res.status(500).json({
-				error: 'Failed to add exercise to program',
-				details: error.message
+				data: {},
+				message: 'Failed to add exercise to program'
 			})
 		}
 	})
@@ -67,20 +69,23 @@ export default () => {
 			const program = await Program.findByPk(programId)
 			if (!program) {
 				return res.status(404).json({
-					error: 'Program not found'
+					data: {},
+					message: 'Program not found'
 				})
 			}
 
 			const exercise = await Exercise.findByPk(exerciseId)
 			if (!exercise) {
 				return res.status(404).json({
-					error: 'Exercise not found'
+					data: {},
+					message: 'Exercise not found'
 				})
 			}
 
 			if (exercise.get('programID') !== parseInt(programId)) {
 				return res.status(400).json({
-					error: 'Exercise does not belong to this program'
+					data: {},
+					message: 'Exercise does not belong to this program'
 				})
 			}
 
@@ -95,8 +100,8 @@ export default () => {
 			})
 		} catch (error: any) {
 			return res.status(500).json({
-				error: 'Failed to remove exercise from program',
-				details: error.message
+				data: {},
+				message: 'Failed to remove exercise from program'
 			})
 		}
 	})

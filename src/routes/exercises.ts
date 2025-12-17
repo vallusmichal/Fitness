@@ -31,20 +31,23 @@ export default () => {
 
 			if (!name || !difficulty || !programID) {
 				return res.status(400).json({
-					error: 'Name, difficulty, and programID are required'
+					data: {},
+					message: 'Name, difficulty, and programID are required'
 				})
 			}
 
 			if (!Object.values(EXERCISE_DIFFICULTY).includes(difficulty)) {
 				return res.status(400).json({
-					error: 'Invalid difficulty. Must be EASY, MEDIUM, or HARD'
+					data: {},
+					message: 'Invalid difficulty. Must be EASY, MEDIUM, or HARD'
 				})
 			}
 
 			const program = await Program.findByPk(programID)
 			if (!program) {
 				return res.status(404).json({
-					error: 'Program not found'
+					data: {},
+					message: 'Program not found'
 				})
 			}
 
@@ -62,8 +65,8 @@ export default () => {
 			})
 		} catch (error: any) {
 			return res.status(500).json({
-				error: 'Failed to create exercise',
-				details: error.message
+				data: {},
+				message: 'Failed to create exercise'
 			})
 		}
 	})
@@ -78,13 +81,15 @@ export default () => {
 
 			if (!exercise) {
 				return res.status(404).json({
-					error: 'Exercise not found'
+					data: {},
+					message: 'Exercise not found'
 				})
 			}
 
 			if (difficulty && !Object.values(EXERCISE_DIFFICULTY).includes(difficulty)) {
 				return res.status(400).json({
-					error: 'Invalid difficulty. Must be EASY, MEDIUM, or HARD'
+					data: {},
+					message: 'Invalid difficulty. Must be EASY, MEDIUM, or HARD'
 				})
 			}
 
@@ -92,7 +97,8 @@ export default () => {
 				const program = await Program.findByPk(programID)
 				if (!program) {
 					return res.status(404).json({
-						error: 'Program not found'
+						data: {},
+						message: 'Program not found'
 					})
 				}
 			}
@@ -112,8 +118,8 @@ export default () => {
 			})
 		} catch (error: any) {
 			return res.status(500).json({
-				error: 'Failed to update exercise',
-				details: error.message
+				data: {},
+				message: 'Failed to update exercise'
 			})
 		}
 	})
@@ -127,7 +133,8 @@ export default () => {
 
 			if (!exercise) {
 				return res.status(404).json({
-					error: 'Exercise not found'
+					data: {},
+					message: 'Exercise not found'
 				})
 			}
 
@@ -141,8 +148,8 @@ export default () => {
 			})
 		} catch (error: any) {
 			return res.status(500).json({
-				error: 'Failed to delete exercise',
-				details: error.message
+				data: {},
+				message: 'Failed to delete exercise'
 			})
 		}
 	})

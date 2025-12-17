@@ -17,20 +17,23 @@ export default () => {
 
 			if (!email || !password) {
 				return res.status(400).json({
-					error: 'Email and password are required'
+					data: {},
+					message: 'Email and password are required'
 				})
 			}
 
 			if (role && !Object.values(USER_ROLE).includes(role)) {
 				return res.status(400).json({
-					error: 'Invalid role. Must be ADMIN or USER'
+					data: {},
+					message: 'Invalid role. Must be ADMIN or USER'
 				})
 			}
 
 			const existingUser = await User.findOne({ where: { email } })
 			if (existingUser) {
 				return res.status(409).json({
-					error: 'User with this email already exists'
+					data: {},
+					message: 'User with this email already exists'
 				})
 			}
 
@@ -54,8 +57,8 @@ export default () => {
 			})
 		} catch (error: any) {
 			return res.status(500).json({
-				error: 'Failed to register user',
-				details: error.message
+				data: {},
+				message: 'Failed to register user'
 			})
 		}
 	})
@@ -73,8 +76,8 @@ export default () => {
 			})
 		} catch (error: any) {
 			return res.status(500).json({
-				error: 'Failed to fetch users',
-				details: error.message
+				data: {},
+				message: 'Failed to fetch users'
 			})
 		}
 	})
@@ -86,7 +89,8 @@ export default () => {
 
 			if (!userId) {
 				return res.status(400).json({
-					error: 'userId is required (will be extracted from auth token later)'
+					data: {},
+					message: 'userId is required (will be extracted from auth token later)'
 				})
 			}
 
@@ -96,7 +100,8 @@ export default () => {
 
 			if (!user) {
 				return res.status(404).json({
-					error: 'User not found'
+					data: {},
+					message: 'User not found'
 				})
 			}
 
@@ -106,8 +111,8 @@ export default () => {
 			})
 		} catch (error: any) {
 			return res.status(500).json({
-				error: 'Failed to fetch user profile',
-				details: error.message
+				data: {},
+				message: 'Failed to fetch user profile'
 			})
 		}
 	})
@@ -125,27 +130,31 @@ export default () => {
 
 			if (!exerciseId || !duration) {
 				return res.status(400).json({
-					error: 'exerciseId and duration are required'
+					data: {},
+					message: 'exerciseId and duration are required'
 				})
 			}
 
 			if (typeof duration !== 'number' || duration <= 0) {
 				return res.status(400).json({
-					error: 'duration must be a positive number (in seconds)'
+					data: {},
+					message: 'duration must be a positive number (in seconds)'
 				})
 			}
 
 			const user = await User.findByPk(userId)
 			if (!user) {
 				return res.status(404).json({
-					error: 'User not found'
+					data: {},
+					message: 'User not found'
 				})
 			}
 
 			const exercise = await Exercise.findByPk(exerciseId)
 			if (!exercise) {
 				return res.status(404).json({
-					error: 'Exercise not found'
+					data: {},
+					message: 'Exercise not found'
 				})
 			}
 
@@ -169,8 +178,8 @@ export default () => {
 			})
 		} catch (error: any) {
 			return res.status(500).json({
-				error: 'Failed to track exercise',
-				details: error.message
+				data: {},
+				message: 'Failed to track exercise'
 			})
 		}
 	})
@@ -182,7 +191,8 @@ export default () => {
 
 			if (!userId) {
 				return res.status(400).json({
-					error: 'userId is required (will be extracted from auth token later)'
+					data: {},
+					message: 'userId is required (will be extracted from auth token later)'
 				})
 			}
 
@@ -201,8 +211,8 @@ export default () => {
 			})
 		} catch (error: any) {
 			return res.status(500).json({
-				error: 'Failed to fetch completed exercises',
-				details: error.message
+				data: {},
+				message: 'Failed to fetch completed exercises'
 			})
 		}
 	})
@@ -215,7 +225,8 @@ export default () => {
 
 			if (!userId) {
 				return res.status(400).json({
-					error: 'userId is required (will be extracted from auth token later)'
+					data: {},
+					message: 'userId is required (will be extracted from auth token later)'
 				})
 			}
 
@@ -223,13 +234,15 @@ export default () => {
 
 			if (!completedExercise) {
 				return res.status(404).json({
-					error: 'Completed exercise not found'
+					data: {},
+					message: 'Completed exercise not found'
 				})
 			}
 
 			if (completedExercise.get('userId') !== parseInt(userId)) {
 				return res.status(403).json({
-					error: 'You can only delete your own completed exercises'
+					data: {},
+					message: 'You can only delete your own completed exercises'
 				})
 			}
 
@@ -243,8 +256,8 @@ export default () => {
 			})
 		} catch (error: any) {
 			return res.status(500).json({
-				error: 'Failed to remove completed exercise',
-				details: error.message
+				data: {},
+				message: 'Failed to remove completed exercise'
 			})
 		}
 	})
@@ -260,7 +273,8 @@ export default () => {
 
 			if (!user) {
 				return res.status(404).json({
-					error: 'User not found'
+					data: {},
+					message: 'User not found'
 				})
 			}
 
@@ -270,8 +284,8 @@ export default () => {
 			})
 		} catch (error: any) {
 			return res.status(500).json({
-				error: 'Failed to fetch user',
-				details: error.message
+				data: {},
+				message: 'Failed to fetch user'
 			})
 		}
 	})
@@ -286,13 +300,15 @@ export default () => {
 
 			if (!user) {
 				return res.status(404).json({
-					error: 'User not found'
+					data: {},
+					message: 'User not found'
 				})
 			}
 
 			if (role && !Object.values(USER_ROLE).includes(role)) {
 				return res.status(400).json({
-					error: 'Invalid role. Must be ADMIN or USER'
+					data: {},
+					message: 'Invalid role. Must be ADMIN or USER'
 				})
 			}
 
@@ -313,8 +329,8 @@ export default () => {
 			})
 		} catch (error: any) {
 			return res.status(500).json({
-				error: 'Failed to update user',
-				details: error.message
+				data: {},
+				message: 'Failed to update user'
 			})
 		}
 	})
