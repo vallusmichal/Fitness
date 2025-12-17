@@ -82,7 +82,7 @@ export default () => {
 				})
 			}
 
-			if (exercise.get('programID') !== parseInt(programId)) {
+			if (exercise.get('programID') != programId) {
 				return res.status(400).json({
 					data: {},
 					message: 'Exercise does not belong to this program'

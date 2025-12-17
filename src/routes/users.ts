@@ -239,7 +239,7 @@ export default () => {
 				})
 			}
 
-			if (completedExercise.get('userId') !== parseInt(userId)) {
+			if (completedExercise.get('userId') != userId) {
 				return res.status(403).json({
 					data: {},
 					message: 'You can only delete your own completed exercises'
