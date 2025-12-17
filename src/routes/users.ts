@@ -60,5 +60,94 @@ export default () => {
 		}
 	})
 
+	// TODO: Add admin auth middleware
+	router.get('/', async (_req: Request, res: Response, _next: NextFunction): Promise<any> => {
+		try {
+			const users = await User.findAll({
+				attributes: { exclude: ['password'] }
+			})
+
+			return res.status(200).json({
+				data: users,
+				message: 'List of users'
+			})
+		} catch (error: any) {
+			return res.status(500).json({
+				error: 'Failed to fetch users',
+				details: error.message
+			})
+		}
+	})
+
+	// TODO: Add admin auth middleware
+	router.get('/:id', async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+		try {
+			const { id } = req.params
+
+			const user = await User.findByPk(id, {
+				attributes: { exclude: ['password'] }
+			})
+
+			if (!user) {
+				return res.status(404).json({
+					error: 'User not found'
+				})
+			}
+
+			return res.status(200).json({
+				data: user,
+				message: 'User details'
+			})
+		} catch (error: any) {
+			return res.status(500).json({
+				error: 'Failed to fetch user',
+				details: error.message
+			})
+		}
+	})
+
+	// TODO: Add admin auth middleware
+	router.put('/:id', async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+		try {
+			const { id } = req.params
+			const { name, surname, nickName, age, role } = req.body
+
+			const user = await User.findByPk(id)
+
+			if (!user) {
+				return res.status(404).json({
+					error: 'User not found'
+				})
+			}
+
+			if (role && !Object.values(USER_ROLE).includes(role)) {
+				return res.status(400).json({
+					error: 'Invalid role. Must be ADMIN or USER'
+				})
+			}
+
+			const updateData: any = {}
+			if (name !== undefined) updateData.name = name
+			if (surname !== undefined) updateData.surname = surname
+			if (nickName !== undefined) updateData.nickName = nickName
+			if (age !== undefined) updateData.age = age
+			if (role !== undefined) updateData.role = role
+
+			await user.update(updateData)
+
+			return res.status(200).json({
+				data: {
+					id: user.id
+				},
+				message: 'User updated successfully'
+			})
+		} catch (error: any) {
+			return res.status(500).json({
+				error: 'Failed to update user',
+				details: error.message
+			})
+		}
+	})
+
 	return router
 }
