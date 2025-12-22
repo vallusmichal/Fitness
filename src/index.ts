@@ -6,7 +6,7 @@ import { sequelize } from './db'
 import ProgramRouter from './routes/programs'
 import ExerciseRouter from './routes/exercises'
 import UserRouter from './routes/users'
-import { configurePassport } from './config/passport'
+import { configurePassport } from './middleware/passport'
 
 const app = express()
 

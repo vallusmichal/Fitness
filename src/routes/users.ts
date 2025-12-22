@@ -6,7 +6,7 @@ import passport from 'passport'
 import { models } from '../db'
 import { USER_ROLE } from '../utils/enums'
 import { authenticate, requireRole } from '../middleware/auth'
-import { JWT_SECRET } from '../config/passport'
+import { JWT_SECRET } from '../middleware/passport'
 
 const router = Router()
 
