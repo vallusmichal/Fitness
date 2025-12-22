@@ -139,7 +139,6 @@ export default () => {
 
 	router.get('/profile',
 		authenticate,
-		requireRole(USER_ROLE.USER),
 		async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
 
 		try {
