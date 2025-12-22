@@ -117,12 +117,15 @@ export default () => {
 
 	router.get('/',
 		authenticate,
-		requireRole(USER_ROLE.USER),
-		async (_req: Request, res: Response, _next: NextFunction): Promise<any> => {
+		async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
 
 		try {
+			const isAdmin = req.user!.role === USER_ROLE.ADMIN
+			
 			const users = await User.findAll({
-				attributes: ['id', 'nickName']
+				attributes: isAdmin 
+					? { exclude: ['password'] }
+					: ['id', 'nickName']
 			})
 
 			return res.status(200).json({
