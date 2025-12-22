@@ -1,155 +1,235 @@
-# Fitness app - assignment
+# Fitness App - Submission
+
+This project is a submission for the Fitness App backend assignment available at [GoodRequest/BackendAssignment-Fitness](https://github.com/GoodRequest/BackendAssignment-Fitness).
+
+The implementation covers all required tasks, including bonus tasks #2 (validation) and #4 (error handling).
+
+Development was assisted by generative AI tools to enhance productivity and code quality.
 
 ### Requirements
 
 - node.js ^16.0.0
 - postgres ^16
-- favourite IDE
-- git
+- docker
 
 ### How to start
 
-- fork or download this repository
 - install dependencies with `npm i`
-- create fitness_app database (application access `postgresql://postgres:postgres@localhost:5432/fitness_app`, make sure you use correct port and db name )
+- start the database with `docker-compose up -d` 
 - create db schema and populate db with `npm run seed`
 - run express server with `npm start`
 
-### How submit assignment
+### How to use
 
-- create public bitbucket or github repository
-- commit and push changes continuously
-- use proper commit messages
-- share your solution with us (link or read permissions for miroslava.filcakova@goodrequest.com)
+The base URL is `http://localhost:8000`.
 
+All authenticated endpoints require `Authorization: Bearer <token>` header.
 
-### You can
+Here are some payload examples for the API endpoints:
 
-- change project structure
-- change or add any npm module
-- change db model (add tables, table columns...)
-- change anything if you can say why
+---
 
-***
+#### 1. Register a new user
 
-## Scenario
+**POST** `/users/register`
 
-The goal of this assignement is to modify given REST API written in express.js using typescript. Public API consist of 2 endpoints `[get]` `localhost:8000/exercises` (list of exercises) and `[get]` `localhost:8000/programs` programs (list of programs).
-
-Structure of API responses
-
-```javascript
+```json
 {
-    data: {
-        id: 1
-    }
-    message: 'You have successfully created program'
+  "email": "user@example.com",
+  "password": "password123",
+  "name": "John",
+  "surname": "Doe",
+  "nickName": "johnny",
+  "age": 25
 }
 ```
 
-or
+---
 
-```javascript
+#### 2. Login
+
+**POST** `/users/login`
+
+```json
 {
-    data: [{
-        id: 1,
-        name: 'Program 1'
-    }]
-    message: 'List of programs'
+  "email": "user@example.com",
+  "password": "password123"
 }
 ```
 
-***
+Returns a JWT token to use in subsequent requests.
 
-## Task 1
+---
 
-Create authorization layer to enable users to access private API (next Task)
+#### 3. Get current user profile
 
-- create new db model User(name:string , surname: string, nickName:string, email: string, age: number, role:[ADMIN/USER])
-- add authorization layer
-- user can register using email, password and role (for purpose of this assignment, user can choose his role in registration)
-- user can log in with email and password
-- use proper way how to store user data
-- you can use any authorization approach or npm module (preferred is JWT strategy and passport)
+**GET** `/users/profile`
 
-***
+**Auth:** Required (any role)
 
-## Task 2
+No request body required.
 
-Create private API for user with role [ADMIN]
+---
 
-ADMIN can:
+#### 4. Get all users
 
-- create, update or delete exercises
-- edit exercises in program (add or remove)
-- get all users and all its data
-- get user detail
-- update any user (name, surname, nickName, age, nickName, role)
+**GET** `/users`
 
-## Task 3
+**Auth:** Required (any role)
 
-***
+No request body required. Returns limited data for USER role, full data for ADMIN role.
 
-Create private API for user with role [USER]
+---
 
-USER can:
+#### 5. Get user by ID
 
-- get all users (id, nickName)
-- get own profile data (name, surname, age, nickName)
-- track exercises he has completed (he can track same exercise multiple times, we want to save datetime of completion and duration in seconds)
-- see list of completed exercises (with datetime and duration) in profile
-- remove tracked exercise from completed exercises list
+**GET** `/users/:id`
 
-USER cannot:
+**Auth:** Required (ADMIN only)
 
-- access ADMIN API
-- get or update another user profile
+Example: `GET /users/1`
 
-***
+---
 
-## Bonus task 1 - pagination, filter, search
+#### 6. Update user
 
-Add pagination to exercise list using query => `/exercises?page=1&limit=10` return 1 page of exercises in maximal length of 10.
+**PUT** `/users/:id`
 
-Add filter by program => `/exercises?programID=1` return only exercises of program with id = 1
+**Auth:** Required (ADMIN only)
 
-add fultext search on exercise name => `/exercises?search=cis` => return only exercises which name consist of string `cis`
-***
-
-## Bonus task 2 - validation
-
-Create validation service to check request body, query and params to make sure user sends valid request. For example, in registration, user must send valid email, otherwise return status code 400.
-Also you can use validation on query in bonus task 1.
-
-***
-
-## Bonus task 3 - localization
-
-Create localization service to send message attribute in API responses in correct language. Default language is EN, optional is SK. User can send all requests with HTTP header `language: 'sk'` or `language: 'en'` to receive required language localization.
-
-example of response for request with `language: 'sk'`
-
-```javascript
+```json
 {
-    data: {
-        id: 1
-    }
-    message: 'Program bol úspešne vytvorený'
+  "name": "Jane",
+  "surname": "Smith",
+  "nickName": "janesmith",
+  "age": 30,
+  "role": "USER"
 }
 ```
 
-***
+---
 
-## Bonus task 4 - error handling
+#### 7. Get all programs
 
-Create proper way how to handle all errors in application. Use console.error display error in terminal, user can never see stack trace or real error message. You can write error logs to file.
+**GET** `/programs`
 
-response status code >= 500
+**Auth:** Required (any role)
 
-```javascript
+No request body required.
+
+---
+
+#### 8. Get all exercises
+
+**GET** `/exercises`
+
+**Auth:** Required (any role)
+
+No request body required.
+
+---
+
+#### 9. Create exercise
+
+**POST** `/exercises`
+
+**Auth:** Required (ADMIN only)
+
+```json
 {
-    data: {}
-    message: 'Something went wrong'
+  "name": "Push-ups",
+  "difficulty": "MEDIUM",
+  "programID": 1
 }
 ```
+
+Difficulty options: `EASY`, `MEDIUM`, `HARD`
+
+---
+
+#### 10. Update exercise
+
+**PUT** `/exercises/:id`
+
+**Auth:** Required (ADMIN only)
+
+```json
+{
+  "name": "Advanced Push-ups",
+  "difficulty": "HARD",
+  "programID": 2
+}
+```
+
+---
+
+#### 11. Delete exercise
+
+**DELETE** `/exercises/:id`
+
+**Auth:** Required (ADMIN only)
+
+Example: `DELETE /exercises/1`
+
+---
+
+#### 12. Add exercise to program
+
+**POST** `/programs/:programId/exercises/:exerciseId`
+
+**Auth:** Required (ADMIN only)
+
+Example: `POST /programs/1/exercises/2`
+
+No request body required.
+
+---
+
+#### 13. Remove exercise from program
+
+**DELETE** `/programs/:programId/exercises/:exerciseId`
+
+**Auth:** Required (ADMIN only)
+
+Example: `DELETE /programs/1/exercises/2`
+
+---
+
+#### 14. Track completed exercise
+
+**POST** `/exercises/completed`
+
+**Auth:** Required (USER only)
+
+```json
+{
+  "exerciseId": 1,
+  "duration": 30,
+  "completedAt": "2024-01-15T10:30:00Z"
+}
+```
+
+`completedAt` is optional (defaults to current time).
+
+---
+
+#### 15. Get my completed exercises
+
+**GET** `/exercises/completed`
+
+**Auth:** Required (USER only)
+
+No request body required.
+
+---
+
+#### 16. Delete completed exercise
+
+**DELETE** `/exercises/completed/:id`
+
+**Auth:** Required (USER only)
+
+Example: `DELETE /exercises/completed/1`
+
+Users can only delete their own completed exercises.
 
