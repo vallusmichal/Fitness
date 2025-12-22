@@ -121,7 +121,8 @@ export default () => {
 
 		try {
 			const isAdmin = req.user!.role === USER_ROLE.ADMIN
-			
+
+			// different scopes for ADMIN and USER
 			const users = await User.findAll({
 				attributes: isAdmin 
 					? { exclude: ['password'] }
