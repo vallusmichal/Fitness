@@ -6,6 +6,7 @@ import passport from 'passport'
 import { models } from '../db'
 import { USER_ROLE } from '../utils/enums'
 import { authenticate, requireRole } from '../middleware/auth'
+import { validateRegistration, validateUserUpdate, validateUserIdParam } from '../middleware/validation'
 import { JWT_SECRET } from '../middleware/passport'
 
 const router = Router()
@@ -16,24 +17,11 @@ const SALT_ROUNDS = 10
 
 export default () => {
 	router.post('/register',
+		validateRegistration,
 		async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
 
 		try {
 			const { email, password, role, name, surname, nickName, age } = req.body
-
-			if (!email || !password) {
-				return res.status(400).json({
-					data: {},
-					message: 'Email and password are required'
-				})
-			}
-
-			if (role && !Object.values(USER_ROLE).includes(role)) {
-				return res.status(400).json({
-					data: {},
-					message: 'Invalid role. Must be ADMIN or USER'
-				})
-			}
 
 			const existingUser = await User.findOne({ where: { email } })
 			if (existingUser) {
@@ -174,6 +162,7 @@ export default () => {
 	router.get('/:id',
 		authenticate,
 		requireRole(USER_ROLE.ADMIN),
+		validateUserIdParam,
 		async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
 
 		try {
@@ -205,6 +194,7 @@ export default () => {
 	router.put('/:id',
 		authenticate,
 		requireRole(USER_ROLE.ADMIN),
+		validateUserUpdate,
 		async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
 
 		try {
@@ -217,13 +207,6 @@ export default () => {
 				return res.status(404).json({
 					data: {},
 					message: 'User not found'
-				})
-			}
-
-			if (role && !Object.values(USER_ROLE).includes(role)) {
-				return res.status(400).json({
-					data: {},
-					message: 'Invalid role. Must be ADMIN or USER'
 				})
 			}
 

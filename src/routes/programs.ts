@@ -8,6 +8,7 @@ import {
 import { models } from '../db'
 import { USER_ROLE } from '../utils/enums'
 import { authenticate, requireRole } from '../middleware/auth'
+import { validateProgramExerciseParams } from '../middleware/validation'
 
 const router = Router()
 
@@ -31,6 +32,7 @@ export default () => {
 	router.post('/:programId/exercises/:exerciseId',
 		authenticate,
 		requireRole(USER_ROLE.ADMIN),
+		validateProgramExerciseParams,
 		async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
 
 		try {
@@ -72,6 +74,7 @@ export default () => {
 	router.delete('/:programId/exercises/:exerciseId',
 		authenticate,
 		requireRole(USER_ROLE.ADMIN),
+		validateProgramExerciseParams,
 		async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
 
 		try {

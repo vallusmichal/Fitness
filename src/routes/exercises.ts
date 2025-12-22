@@ -3,6 +3,7 @@ import { Router, Request, Response, NextFunction } from 'express'
 import { models } from '../db'
 import { EXERCISE_DIFFICULTY, USER_ROLE } from '../utils/enums'
 import { authenticate, requireRole } from '../middleware/auth'
+import { validateExerciseCreate, validateExerciseUpdate, validateExerciseIdParam, validateCompletedExercise } from '../middleware/validation'
 
 const router = Router()
 
@@ -33,24 +34,11 @@ export default () => {
 	router.post('/',
 		authenticate,
 		requireRole(USER_ROLE.ADMIN),
+		validateExerciseCreate,
 		async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
 
 		try {
 			const { name, difficulty, programID } = req.body
-
-			if (!name || !difficulty || !programID) {
-				return res.status(400).json({
-					data: {},
-					message: 'Name, difficulty, and programID are required'
-				})
-			}
-
-			if (!Object.values(EXERCISE_DIFFICULTY).includes(difficulty)) {
-				return res.status(400).json({
-					data: {},
-					message: 'Invalid difficulty. Must be EASY, MEDIUM, or HARD'
-				})
-			}
 
 			const program = await Program.findByPk(programID)
 			if (!program) {
@@ -83,6 +71,7 @@ export default () => {
 	router.put('/:id',
 		authenticate,
 		requireRole(USER_ROLE.ADMIN),
+		validateExerciseUpdate,
 		async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
 
 		try {
@@ -95,13 +84,6 @@ export default () => {
 				return res.status(404).json({
 					data: {},
 					message: 'Exercise not found'
-				})
-			}
-
-			if (difficulty && !Object.values(EXERCISE_DIFFICULTY).includes(difficulty)) {
-				return res.status(400).json({
-					data: {},
-					message: 'Invalid difficulty. Must be EASY, MEDIUM, or HARD'
 				})
 			}
 
@@ -139,6 +121,7 @@ export default () => {
 	router.delete('/:id',
 		authenticate,
 		requireRole(USER_ROLE.ADMIN),
+		validateExerciseIdParam,
 		async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
 
 		try {
@@ -172,25 +155,12 @@ export default () => {
 	router.post('/completed',
 		authenticate,
 		requireRole(USER_ROLE.USER),
+		validateCompletedExercise,
 		async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
 
 		try {
 			const userId = req.user!.id
 			const { exerciseId, duration, completedAt } = req.body
-
-			if (!exerciseId || !duration) {
-				return res.status(400).json({
-					data: {},
-					message: 'exerciseId and duration are required'
-				})
-			}
-
-			if (typeof duration !== 'number' || duration <= 0) {
-				return res.status(400).json({
-					data: {},
-					message: 'duration must be a positive number (in seconds)'
-				})
-			}
 
 			const user = await User.findByPk(userId)
 			if (!user) {
@@ -266,6 +236,7 @@ export default () => {
 	router.delete('/completed/:id',
 		authenticate,
 		requireRole(USER_ROLE.USER),
+		validateExerciseIdParam,
 		async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
 
 		try {
