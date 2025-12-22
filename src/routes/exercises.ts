@@ -1,7 +1,8 @@
 import { Router, Request, Response, NextFunction } from 'express'
 
 import { models } from '../db'
-import { EXERCISE_DIFFICULTY } from '../utils/enums'
+import { EXERCISE_DIFFICULTY, USER_ROLE } from '../utils/enums'
+import { authenticate, requireRole } from '../middleware/auth'
 
 const router = Router()
 
@@ -11,7 +12,10 @@ const {
 } = models
 
 export default () => {
-	router.get('/', async (_req: Request, res: Response, _next: NextFunction): Promise<any> => {
+	router.get('/',
+		authenticate,
+		async (_req: Request, res: Response, _next: NextFunction): Promise<any> => {
+
 		const exercises = await Exercise.findAll({
 			include: [{
 				model: Program
@@ -24,8 +28,11 @@ export default () => {
 		})
 	})
 
-	// TODO: Add admin auth middleware
-	router.post('/', async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+	router.post('/',
+		authenticate,
+		requireRole(USER_ROLE.ADMIN),
+		async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+
 		try {
 			const { name, difficulty, programID } = req.body
 
@@ -71,8 +78,11 @@ export default () => {
 		}
 	})
 
-	// TODO: Add admin auth middleware
-	router.put('/:id', async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+	router.put('/:id',
+		authenticate,
+		requireRole(USER_ROLE.ADMIN),
+		async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+
 		try {
 			const { id } = req.params
 			const { name, difficulty, programID } = req.body
@@ -124,8 +134,11 @@ export default () => {
 		}
 	})
 
-	// TODO: Add admin auth middleware
-	router.delete('/:id', async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+	router.delete('/:id',
+		authenticate,
+		requireRole(USER_ROLE.ADMIN),
+		async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+
 		try {
 			const { id } = req.params
 

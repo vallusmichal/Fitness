@@ -1,8 +1,12 @@
 import { Router, Request, Response, NextFunction } from 'express'
 import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
+import passport from 'passport'
 
 import { models } from '../db'
 import { USER_ROLE } from '../utils/enums'
+import { authenticate, requireRole } from '../middleware/auth'
+import { JWT_SECRET } from '../config/passport'
 
 const router = Router()
 
@@ -11,7 +15,9 @@ const { User, CompletedExercise, Exercise } = models
 const SALT_ROUNDS = 10
 
 export default () => {
-	router.post('/register', async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+	router.post('/register',
+		async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+
 		try {
 			const { email, password, role, name, surname, nickName, age } = req.body
 
@@ -63,8 +69,57 @@ export default () => {
 		}
 	})
 
-	// TODO: Add USER role authorization
-	router.get('/', async (_req: Request, res: Response, _next: NextFunction): Promise<any> => {
+	router.post('/login',
+		async (req: Request, res: Response, next: NextFunction): Promise<any> => {
+
+		passport.authenticate('local', { session: false }, (err: any, user: any, info: any) => {
+			if (err) {
+				return res.status(500).json({
+					data: {},
+					message: 'Login failed'
+				})
+			}
+
+			if (!user) {
+				return res.status(401).json({
+					data: {},
+					message: info?.message || 'Invalid email or password'
+				})
+			}
+
+			const token = jwt.sign(
+				{
+					userId: user.id,
+					email: user.email,
+					role: user.role
+				},
+				JWT_SECRET,
+				{ expiresIn: '7d' }
+			)
+
+			return res.status(200).json({
+				data: {
+					token,
+					user: {
+						id: user.id,
+						email: user.email,
+						role: user.role,
+						name: user.name,
+						surname: user.surname,
+						nickName: user.nickName,
+						age: user.age
+					}
+				},
+				message: 'Login successful'
+			})
+		})(req, res, next)
+	})
+
+	router.get('/',
+		authenticate,
+		requireRole(USER_ROLE.USER),
+		async (_req: Request, res: Response, _next: NextFunction): Promise<any> => {
+
 		try {
 			const users = await User.findAll({
 				attributes: ['id', 'nickName']
@@ -82,19 +137,15 @@ export default () => {
 		}
 	})
 
-	// TODO: Add USER role authorization and extract userId from auth token
-	router.get('/profile', async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+	router.get('/profile',
+		authenticate,
+		requireRole(USER_ROLE.USER),
+		async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+
 		try {
-			const { userId } = req.query
+			const userId = req.user!.id
 
-			if (!userId) {
-				return res.status(400).json({
-					data: {},
-					message: 'userId is required (will be extracted from auth token later)'
-				})
-			}
-
-			const user = await User.findByPk(userId as string, {
+			const user = await User.findByPk(userId, {
 				attributes: ['name', 'surname', 'age', 'nickName']
 			})
 
@@ -117,16 +168,14 @@ export default () => {
 		}
 	})
 
-	// TODO: Add USER role authorization and extract userId from auth token
-	router.post('/exercises/completed', async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
-		try {
-			const { userId, exerciseId, duration, completedAt } = req.body
+	router.post('/exercises/completed',
+		authenticate,
+		requireRole(USER_ROLE.USER),
+		async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
 
-			if (!userId) {
-				return res.status(400).json({
-					error: 'userId is required (will be extracted from auth token later)'
-				})
-			}
+		try {
+			const userId = req.user!.id
+			const { exerciseId, duration, completedAt } = req.body
 
 			if (!exerciseId || !duration) {
 				return res.status(400).json({
@@ -184,17 +233,13 @@ export default () => {
 		}
 	})
 
-	// TODO: Add USER role authorization and extract userId from auth token
-	router.get('/exercises/completed', async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
-		try {
-			const { userId } = req.query
+	router.get('/exercises/completed',
+		authenticate,
+		requireRole(USER_ROLE.USER),
+		async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
 
-			if (!userId) {
-				return res.status(400).json({
-					data: {},
-					message: 'userId is required (will be extracted from auth token later)'
-				})
-			}
+		try {
+			const userId = req.user!.id
 
 			const completedExercises = await CompletedExercise.findAll({
 				where: { userId },
@@ -217,18 +262,14 @@ export default () => {
 		}
 	})
 
-	// TODO: Add USER role authorization and extract userId from auth token
-	router.delete('/exercises/completed/:id', async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+	router.delete('/exercises/completed/:id',
+		authenticate,
+		requireRole(USER_ROLE.USER),
+		async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+
 		try {
 			const { id } = req.params
-			const { userId } = req.body
-
-			if (!userId) {
-				return res.status(400).json({
-					data: {},
-					message: 'userId is required (will be extracted from auth token later)'
-				})
-			}
+			const userId = req.user!.id
 
 			const completedExercise = await CompletedExercise.findByPk(id)
 
@@ -262,8 +303,11 @@ export default () => {
 		}
 	})
 
-	// TODO: Add admin auth middleware
-	router.get('/:id', async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+	router.get('/:id',
+		authenticate,
+		requireRole(USER_ROLE.ADMIN),
+		async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+
 		try {
 			const { id } = req.params
 
@@ -290,8 +334,11 @@ export default () => {
 		}
 	})
 
-	// TODO: Add admin auth middleware
-	router.put('/:id', async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+	router.put('/:id',
+		authenticate,
+		requireRole(USER_ROLE.ADMIN),
+		async (req: Request, res: Response, _next: NextFunction): Promise<any> => {
+
 		try {
 			const { id } = req.params
 			const { name, surname, nickName, age, role } = req.body
